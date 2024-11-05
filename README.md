@@ -1,4 +1,5 @@
 # TADphys
+Scripts for the biophysical modelling simulations
 
 **Documentation**
 *************
@@ -52,6 +53,3 @@ Bibliography
 .. [Serra] Serra, F. et al. Automatic analysis and 3D-modelling of Hi-C data using TADbit reveals structural features of the fly chromatin colors. PLoS Comp Biol 1005665 (2017).
 	   
 .. [Plimpton] Plimpton, S. Fast Parallel Algorithms for Short-Range Molecular Dynamics. J Comp Phys 117, 1-19 (1995).
-
-# TADphys
-Scripts for the biophysical modelling simulations
