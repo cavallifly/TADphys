@@ -9,6 +9,7 @@ Next, you can use the provided TADphys.yml to create the TADphys enviroment (Exe
    | conda env create -f TADphys.yml
 
 **Install LAMMPS as a shared library**
+  
    1 - Download lammps
    git clone -b stable https://github.com/lammps/lammps.git mylammps
    
@@ -22,6 +23,7 @@ Next, you can use the provided TADphys.yml to create the TADphys enviroment (Exe
    cd ../../
 
 **Install TADphys**
+   
    1 - Download TADphys from the Github repository
    git clone https://github.com/MarcoDiS/TADphys.git -b TADphys TADphys
 
