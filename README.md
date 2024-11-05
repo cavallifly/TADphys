@@ -27,8 +27,9 @@ Next, you can use the provided TADphys.yml to create the TADphys enviroment (Exe
 **Install TADphys**
    
    1 - Download TADphys from the Github repository
+   ```bash
    git clone https://github.com/MarcoDiS/TADphys.git -b TADphys TADphys
-
+   ```
    2 - Install TADphys
    ```bash
    cd TADphys
