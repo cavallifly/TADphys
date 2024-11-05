@@ -1,12 +1,3 @@
-
-
-+-----------------------+-+
-|                       | |
-| Current version: pipeline_v0.1.0  |
-|                       | |
-+-----------------------+-+
-
-
 TADphys.
 
 Documentation
