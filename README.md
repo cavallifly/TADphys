@@ -39,17 +39,18 @@ conda env create -f TADphys.yml
    python setup.py install
    cd ..
    ```
-Citation
+
+Methods implemented in TADphys
+-----------------------------
+In the actual implementation, TADphys relies on TADdyn [[1]](#1) and TADbit [[2]](#2) for the general structure of the package and LAMMPS [[3]](#3) for the implementation of the simulations.
+
+**Citation**
 ********
 Please, cite this article if you use TADphys.
 
 Ivana Jerković, Marco Di Stefano, Hadrien Reboul, Michael F Szalay,  Davide Normanno, Giorgio L Papadopoulos, Frederic Bantignies, Giacomo Cavalli.
 **A Scaffolding Element Rewires Local 3D Chromatin Architecture During Differentiation.**
 *bioRxiv* 642009; [doi.org/10.1101/2024.05.23.595561](https://doi.org/10.1101/2024.05.23.595561)
-
-Methods implemented in TADphys
------------------------------
-In the actual implementation, TADphys relies on TADdyn [[1]](#1) and TADbit [[2]](#2) for the general structure of the package and LAMMPS [[3]](#3) for the implementation of the simulations.
 
 **Bibliography**
 ************
