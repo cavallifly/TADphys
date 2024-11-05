@@ -29,7 +29,7 @@ git clone -b stable https://github.com/lammps/lammps.git mylammps
 2 - Install lammps as a shared library
 ```bash
 cd ../../src/
-include "-DLAMMPS_EXCEPTIONS" in the LMP_INC line in src/MAKE/Makefile.mpi
+Open the file MAKE/Makefile.mpi with your preferred text editor and add "-DLAMMPS_EXCEPTIONS" in the LMP_INC line
 make yes-molecule
 make mpi mode=shlib
 make install-python
