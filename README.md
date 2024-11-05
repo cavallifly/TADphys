@@ -7,7 +7,9 @@ Scripts for the biophysical modelling simulations
 **Create TADphys conda enviroment**
 To use TADphys, we recommend to insatll the package manager conda from 'https://conda.io/projects/conda/en/latest/user-guide/install/index.html'.
 Next, you can use the provided TADphys.yml to create the TADphys enviroment (Execution time ~30 minutes)
-   | conda env create -f TADphys.yml
+```bash
+conda env create -f TADphys.yml
+```
 
 **Install LAMMPS as a shared library**
   
