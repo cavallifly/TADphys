@@ -43,13 +43,15 @@ Ivana Jerković, Marco Di Stefano, Hadrien Reboul, Michael F Szalay,  Davide Nor
 
 Methods implemented in TADphys
 -----------------------------
-In the actual implementation, TADphys relies on TADdyn [[1]](#1) and TADbit [Serra]_ for the general structure of the package and LAMMPS [Plimpton]_ for the implementation of the simulations.
+In the actual implementation, TADphys relies on TADdyn [[1]](#1) and TADbit [[2]](#2) for the general structure of the package and LAMMPS [[3]](#3) for the implementation of the simulations.
 
 **Bibliography**
 ************
 <a id="1">[1]</a>
 Di Stefano, M. et al. Transcriptional activation during cell reprogramming correlates with the formation of 3D open chromatin hubs. Nature communications 11 (1), 1-12 (2020).
-	       
-.. [Serra] Serra, F. et al. Automatic analysis and 3D-modelling of Hi-C data using TADbit reveals structural features of the fly chromatin colors. PLoS Comp Biol 1005665 (2017).
+
+<a id="2">[2]</a>
+Serra, F. et al. Automatic analysis and 3D-modelling of Hi-C data using TADbit reveals structural features of the fly chromatin colors. PLoS Comp Biol 1005665 (2017).
 	   
-.. [Plimpton] Plimpton, S. Fast Parallel Algorithms for Short-Range Molecular Dynamics. J Comp Phys 117, 1-19 (1995).
+<a id="3">[3]</a>
+Plimpton, S. Fast Parallel Algorithms for Short-Range Molecular Dynamics. J Comp Phys 117, 1-19 (1995).
