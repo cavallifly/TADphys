@@ -3,6 +3,11 @@ Scripts for the biophysical modelling simulations
 
 **Documentation**
 *************
+**Download TADphys repository**
+Download TADphys from the Github repository
+```bash
+git clone https://github.com/cavallifly/TADphys.git -b TADphys TADphys
+```
 
 **Create TADphys conda environment**
 To use TADphys, we recommend installing the package manager conda from 'https://conda.io/projects/conda/en/latest/user-guide/install/index.html.'
@@ -14,31 +19,29 @@ conda env create -f TADphys.yml
 
 **Install LAMMPS as a shared library**
   
-   1 - Download lammps
-   ```bash
-   git clone -b stable https://github.com/lammps/lammps.git mylammps
-   ```
-   2 - Install lammps as a shared library
-   ```bash
-   cd ../../src/
-   include "-DLAMMPS_EXCEPTIONS" in the LMP_INC line in src/MAKE/Makefile.mpi
-   make yes-molecule
-   make mpi mode=shlib
-   make install-python
-   cd ../../
-   ```
+1 - Download lammps
+```bash
+git clone -b stable https://github.com/lammps/lammps.git mylammps
+```
+
+2 - Install lammps as a shared library
+```bash
+cd ../../src/
+include "-DLAMMPS_EXCEPTIONS" in the LMP_INC line in src/MAKE/Makefile.mpi
+make yes-molecule
+make mpi mode=shlib
+make install-python
+cd ../../
+```
+
 **Install TADphys**
    
-   1 - Download TADphys from the Github repository
-   ```bash
-   git clone https://github.com/cavallifly/TADphys.git -b TADphys TADphys
-   ```
-   2 - Install TADphys
-   ```bash
-   cd TADphys
-   python setup.py install
-   cd ..
-   ```
+Install TADphys
+```bash
+cd TADphys
+python setup.py install
+cd ..
+```
 
 Methods implemented in TADphys
 -----------------------------
