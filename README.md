@@ -1,4 +1,4 @@
-# TADphys.
+# TADphys
 
 **Documentation**
 *************
@@ -22,13 +22,13 @@ Next, you can use the provided TADphys.yml to create the TADphys enviroment (Exe
    cd ../../
 
 **Install TADphys**
-   | 1 - Download TADphys from the Github repository
-   | git clone https://github.com/MarcoDiS/TADphys.git -b TADphys TADphys
+   1 - Download TADphys from the Github repository
+   git clone https://github.com/MarcoDiS/TADphys.git -b TADphys TADphys
 
-   | 2 - Install TADphys
-   | cd TADphys
-   | python setup.py install
-   | cd ..
+   2 - Install TADphys
+   cd TADphys
+   python setup.py install
+   cd ..
 
 Citation
 ********
