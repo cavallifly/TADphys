@@ -30,7 +30,7 @@ conda env create -f TADphys.yml
    
    1 - Download TADphys from the Github repository
    ```bash
-   git clone https://github.com/MarcoDiS/TADphys.git -b TADphys TADphys
+   git clone https://github.com/cavallifly/TADphys.git -b TADphys TADphys
    ```
    2 - Install TADphys
    ```bash
