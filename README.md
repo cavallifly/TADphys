@@ -1,6 +1,6 @@
-TADphys.
+# TADphys.
 
-Documentation
+**Documentation**
 *************
 
 **Create TADphys conda enviroment**
