@@ -44,7 +44,7 @@ Please, cite this article if you use TADphys.
 
 Ivana Jerković, Marco Di Stefano, Hadrien Reboul, Michael F Szalay,  Davide Normanno, Giorgio L Papadopoulos, Frederic Bantignies, Giacomo Cavalli.
 **A Scaffolding Element Rewires Local 3D Chromatin Architecture During Differentiation.**
-*bioRxiv* 642009; `doi.org/10.1101/2024.05.23.595561`_
+*bioRxiv* 642009; [doi.org/10.1101/2024.05.23.595561](doi.org/10.1101/2024.05.23.595561)
 
 Methods implemented in TADphys
 -----------------------------
