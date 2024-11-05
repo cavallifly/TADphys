@@ -12,27 +12,29 @@ Next, you can use the provided TADphys.yml to create the TADphys enviroment (Exe
 **Install LAMMPS as a shared library**
   
    1 - Download lammps
+   ```bash
    git clone -b stable https://github.com/lammps/lammps.git mylammps
-   
+   ```
    2 - Install lammps as a shared library
+   ```bash
    cd ../../src/
    include "-DLAMMPS_EXCEPTIONS" in the LMP_INC line in src/MAKE/Makefile.mpi
    make yes-molecule
    make mpi mode=shlib
    make install-python
-
    cd ../../
-
+   ```
 **Install TADphys**
    
    1 - Download TADphys from the Github repository
    git clone https://github.com/MarcoDiS/TADphys.git -b TADphys TADphys
 
    2 - Install TADphys
+   ```bash
    cd TADphys
    python setup.py install
    cd ..
-
+   ```
 Citation
 ********
 Please, cite this article if you use TADphys.
