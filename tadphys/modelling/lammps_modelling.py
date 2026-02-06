@@ -539,7 +539,9 @@ def lammps_simulate(lammps_folder, run_time,
                     steering_pairs=None,
                     time_dependent_steering_pairs=None,
                     compartmentalization=None,
-                    loop_extrusion_dynamics_OLD=None, loop_extrusion_dynamics=None, cleanup = False,
+                    loop_extrusion_dynamics_OLD=None, loop_extrusion_dynamics=None,
+                    mitotic_organization=None,
+                    cleanup = False, 
                     to_dump=100000, pbc=False, timeout_job=3600,
                     hide_log=True,
                     gamma=CONFIG.gamma, timestep=CONFIG.timestep,
@@ -731,6 +733,7 @@ def lammps_simulate(lammps_folder, run_time,
                                   steering_pairs,
                                   time_dependent_steering_pairs,
                                   compartmentalization,
+                                  mitotic_organization,
                                   loop_extrusion_dynamics,
                                   to_dump, pbc, hide_log,                                  
                                   gamma,timestep,reset_timestep,
@@ -807,6 +810,7 @@ def run_lammps(kseed, lammps_folder, run_time,
                compartmentalization=None,
                loop_extrusion_dynamics_OLD=None,
                loop_extrusion_dynamics=None,               
+               mitotic_organization=None,
                transcription_based_loop_extrusion_dynamics=None,               
                to_dump=10000, pbc=False,
                hide_log=True,
@@ -3149,6 +3153,158 @@ def run_lammps(kseed, lammps_folder, run_time,
                 print("Extruders still to load per chain ",extrudersToLoad)
             sys.stdout.flush()
 
+    # Setup the commands for simulation mitotic-like organization
+    if mitotic_organization:
+        # Switch off bending rigidity interaction to prevent errors when the particles are superimposed
+        lmp.command("angle_style none")     
+
+        # Redefine sigma and epsilon parameters
+        sigma   = CONFIG.PurelyRepulsiveLJsigma
+        epsilon = CONFIG.PurelyRepulsiveLJepsilon
+        rc      = CONFIG.PurelyRepulsiveLJcutoff
+        if excludedVolume:
+            for atomTypePair in excludedVolume:
+                epsilon = excludedVolume[atomTypePair][1]
+                sigma   = excludedVolume[atomTypePair][2]
+                rc      = excludedVolume[atomTypePair][3]
+ 
+        # Set the restraints to try to anchor loops to the backbone 
+        restrain_number = 1
+        if "restraints" in mitotic_organization: 
+            if isinstance(mitotic_organization["restraints"], str):
+                filename = mitotic_organization["restraints"]
+                fp = open(filename,"r")
+                for restraint in fp.readlines():
+                    restraint = restraint.strip().split()
+                    print(restraint)
+                    
+                    particle1 = int(restraint[0])
+                    particle2 = int(restraint[1])
+                    kappa     = float(restraint[2])
+                     
+                    lmp.command("fix RESTR%i all restrain bond %i %i %f %f %f %f" % (restrain_number,
+                                                                                      particle1,
+                                                                                      particle2,
+                                                                                      kappa,
+                                                                                      kappa,
+                                                                                      0.0,
+                                                                                      0.0))
+                    restrain_number = restrain_number + 1
+ 
+            if isinstance(mitotic_organization["restraints"], list):
+                for restraint in mitotic_organization["restraints"]:
+                     
+                    particle1 = int(restraint[0])
+                    particle2 = int(restraint[1])
+                    kappa     = float(restraint[2])
+                    
+                    lmp.command("fix RESTR%i all restrain bond %i %i %f %f %f %f" % (restrain_number,
+                                                                                     particle1,
+                                                                                     particle2,
+                                                                                     kappa,
+                                                                                     kappa,
+                                                                                     0.0,
+                                                                                     0.0))
+                    restrain_number = restrain_number + 1
+ 
+        ### BEGIN: Perform push-off runs to grow the loops protruding from the backbone ###
+        runtimePerType = 1000
+        if "runtimePerType" in mitotic_organization:
+            runtimePerType = mitotic_organization["runtimePerType"]
+
+        # Initiall set all particles to be immobile with initial velocity zero
+        if "nTypes" in mitotic_organization:
+             types=""
+ 
+             for nType in [1]:
+                 types=types + " %d" % nType
+                 
+             lmp.command("group immobile_particles type %s" % types)
+             lmp.command("group mobile_particles subtract all immobile_particles")
+             
+             lmp.command("fix freeze immobile_particles setforce 0.0 0.0 0.0")
+             lmp.command("velocity immobile_particles set 0.0 0.0 0.0")
+             
+        # Switch off all the Lennard Jones interactions to avoid bead clushes
+        lmp.command("pair_coeff * * lj/cut 1 %f %f %f" % (0, 0, 0))
+        lmp.command("pair_coeff * * lj/cut 2 %f %f %f" % (0, 0, 0))        
+
+        # Perform the push-off simulations
+        pushOff = [0.,100.,rc]
+        lmp.command("variable prefactor equal ramp(%f,%f)" % (pushOff[0],pushOff[1]))
+        for nType in range(3,mitotic_organization["nTypes"]+1):
+            lmp.command("unfix 1")
+            lmp.command("unfix 2")            
+            lmp.command("unfix freeze")
+            lmp.command("group immobile_particles delete")
+            lmp.command("group mobile_particles   delete")
+ 
+            types="1"
+            for nTypeUnfreeze in range(nType+1,mitotic_organization["nTypes"]+1):
+                types = types + " %d" % nTypeUnfreeze
+ 
+            lmp.command("group immobile_particles type %s" % types)
+            lmp.command("group mobile_particles subtract all immobile_particles")
+             
+            lmp.command("fix freeze immobile_particles setforce 0.0 0.0 0.0")
+            lmp.command("velocity immobile_particles set 0.0 0.0 0.0")
+ 
+            # Define the soft potential for the pushOff
+            lmp.command("pair_style soft %f" % (pushOff[2]))
+            lmp.command("pair_coeff * * 0.0")
+             
+            for nTypeUnfreeze1 in range(2,nType):
+                for nTypeUnfreeze2 in range(nTypeUnfreeze1,nType):
+                    if nTypeUnfreeze1 < (nType-1) and nTypeUnfreeze2 < (nType-1):
+                        lmp.command("pair_coeff %d %d %f" % (nTypeUnfreeze1, nTypeUnfreeze2, 10*pushOff[1]))
+                    else:
+                        lmp.command("fix pushOff all adapt 1 pair soft a %d %d v_prefactor" % (nTypeUnfreeze1, nTypeUnfreeze2))
+ 
+            lmp.command("velocity mobile_particles create 1.0 %s" % randint(1,100000))
+            lmp.command("fix 1 mobile_particles nve/limit %f" % (nveLimit[0]))
+            lmp.command("fix 2 mobile_particles langevin 1.0  1.0  %f %i" % (gamma,randint(1,100000)))
+            lmp.command("run %i" % runtimePerType)
+            
+        lmp.command("write_data pushedOff_conformation.txt nocoeff")
+        ### END: Perform push-off runs to grow the loops protruding from the backbone ###
+ 
+        ### BEGIN: Reset the Kremer-Grest model ###
+        bondType = 1
+         
+        # Re-define the Lennard-Jones potential excluded-volume and the FENE coneectivity potentials with the target values of epsilon and sigma
+        lmp.command("pair_style hybrid/overlay lj/cut %f lj/cut %f" % (rc , rc)) 
+        lmp.command("bond_style fene")
+                 
+        connectivity = {1:["FENE", 30.0, 1.5, epsilon, sigma]}
+        lmp.command("special_bonds fene") #<=== I M P O R T A N T (new command)
+ 
+        nRounds = 100        
+        for e in range(1,int(nRounds)+1,1):
+            lmp.command("pair_coeff * * lj/cut 1 %f %f %f" % (connectivity[bondType][3] * (e / nRounds), sigma, rc))
+            lmp.command("pair_coeff 1 * lj/cut 1 %f %f %f" % (0.0, sigma, rc))            
+            lmp.command("bond_coeff %d %f %f %f %f" % (bondType, connectivity[bondType][1] * (e / nRounds), connectivity[bondType][2], connectivity[bondType][3] * (e/nRounds), connectivity[bondType][4]))
+            currentTime = lmp.get_thermo("step")
+            lmp.command("minimize 1.0e-6 1.0e-8 10000000 10000000")
+            lmp.command("reset_timestep %i" % currentTime)
+3154a3985,4000
+            lmp.command("run %i" % 10)
+        ### BEGIN: Reset the Kremer-Grest model ###            
+ 
+        lmp.command("unfix 1")
+        lmp.command("fix 1 mobile_particles nve")        
+
+        # Reset the angle potential
+        lmp.command("angle_style %s" % CONFIG.angle_style) # Write function for kinks             
+        if persistence_length:
+            if isinstance(persistence_length, (float)):
+                lmp.command("angle_coeff * %f" % persistence_length)
+            else:
+                for i in range(len(persistence_length)):
+                    lmp.command("angle_coeff %i %f" % (i+1,persistence_length[i]))
+        else:
+            lmp.command("angle_coeff * %f" % CONFIG.persistence_length)
+
+            
 
     # Setup the pairs to co-localize using the COLVARS plug-in
     if loop_extrusion_dynamics:        
@@ -4258,6 +4414,7 @@ def giorgettis_modelling(
             steering_pairs=None
             time_dependent_steering_pairs=None
             loop_extrusion_dynamics_OLD=None
+            mitotic_organization=None
             loop_extrusion_dynamics=None            
             pbc=False
             keep_restart_out_dir2=None
@@ -4286,6 +4443,7 @@ def giorgettis_modelling(
                                    steering_pairs,
                                    time_dependent_steering_pairs,
                                    compartmentalization,
+                                   mitotic_organization,
                                    loop_extrusion_dynamics,
                                    to_dump, pbc, hide_log,
                                    gamma,timestep,
@@ -4431,6 +4589,7 @@ def giorgettis_modelling(
             steering_pairs=None
             time_dependent_steering_pairs=None
             loop_extrusion_dynamics_OLD=None
+            mitotic_organization=None
             loop_extrusion_dynamics=None            
             pbc=False
             keep_restart_out_dir2=None
@@ -4459,6 +4618,7 @@ def giorgettis_modelling(
                                    steering_pairs,
                                    time_dependent_steering_pairs,
                                    compartmentalization,
+                                   mitotic_organization=,
                                    loop_extrusion_dynamics,
                                    to_dump, pbc, hide_log,
                                    gamma,timestep,
@@ -6582,14 +6742,37 @@ def draw_point_inside_the_confining_environment(confining_environment, object_ra
         dimension_y = confining_environment[2]
         dimension_z = confining_environment[3]
 
-    if confining_environment[0] == 'cylinder':
-        if len(confining_environment) < 3:
-            print("# WARNING: Defined a cylindrical confining environment without the necessary paramenters.")
-            print("# 3 are needed the identifier, the basal radius, and the height")
-            sys.exit()
-        dimension_x = confining_environment[1]
-        dimension_y = confining_environment[1]
-        dimension_z = confining_environment[2]
+
+    if confining_environment[0] == "cylinder":
+        #cylinder args = dim c1 c2 radius lo hi
+        #dim = x or y or z = axis of cylinder
+        #c1,c2 = coords of cylinder axis in other 2 dimensions (distance units)
+        #radius = cylinder radius (distance units)
+        #c1,c2, and radius can be a variable (see below)
+        #lo,hi = bounds of cylinder in dim (distance units)
+
+        dim = confining_environment[1]
+        c1 = confining_environment[2]
+        c2 = confining_environment[3]
+        cylRadius = confining_environment[4]
+        lo = confining_environment[5]
+        hi = confining_environment[6]            
+        eps = confining_environment[7]
+        sig = confining_environment[8]            
+            
+        lmp.command("region cylinder cylinder %s %s %s %s %s %s" % (dim, c1, c2, cylRadius, lo, hi))
+        lmp.command("fix cylinder all  wall/region cylinder lj126 %f %f %f" % (eps, sig, sig*1.12246152962189))
+        print("region cylinder cylinder %s %s %s %s %s %s" % (dim, c1, c2, cylRadius, lo, hi))
+        print("fix cylinder all  wall/region cylinder lj126 %f %f %f" % (eps, sig, sig*1.12246152962189))
+
+    #if confining_environment[0] == 'cylinder':
+    #    if len(confining_environment) < 3:
+    #        print("# WARNING: Defined a cylindrical confining environment without the necessary paramenters.")
+    #        print("# 3 are needed the identifier, the basal radius, and the height")
+    #        sys.exit()
+    #    dimension_x = confining_environment[1]
+    #    dimension_y = confining_environment[1]
+    #    dimension_z = confining_environment[2]
             
 
         
